@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yearly Wishlist Budget</title>
+
+  <style>
+    /*********************************************************************
+     * STYLES (UI Theme)
+     *********************************************************************/
+    :root{
+      --bg: #0f1216;
+      --panel: #151a21;
+      --panel2:#10141a;
+      --text:#e8eef7;
+      --muted:#9fb0c5;
+      --line:#263041;
+      --accent:#6aa6ff;
+      --good:#37d67a;
+      --bad:#ff5c7a;
+      --warn:#ffd166;
+      --shadow: 0 10px 35px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(900px 500px at 20% 0%, rgba(106,166,255,.15), transparent 60%),
+                  radial-gradient(900px 500px at 80% 10%, rgba(55,214,122,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:28px 14px 96px; /* extra bottom padding so content doesn't hide behind disclaimer */
+    }
+
+    .app{
+      width:min(1100px, 100%);
+      display:grid;
+      gap:16px;
+    }
+
+    header{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:18px 18px 16px;
+    }
+
+    .top{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+
+    .muted{ color:var(--muted); }
+
+    .year-controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    label{ font-size:13px; color:var(--muted); }
+
+    select, input, textarea{
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 12px;
+      padding:10px 10px;
+      outline:none;
+    }
+
+    select:focus, input:focus, textarea:focus{
+      border-color: rgba(106,166,255,.7);
+      box-shadow: 0 0 0 3px rgba(106,166,255,.15);
+    }
+
+    .btn{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      font-weight:600;
+      font-size:13px;
+    }
+
+    .btn:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: rgba(106,166,255,.16);
+      border-color: rgba(106,166,255,.45);
+    }
+    .btn.primary:hover{ background: rgba(106,166,255,.22); }
+
+    .btn.good{
+      background: rgba(55,214,122,.14);
+      border-color: rgba(55,214,122,.40);
+    }
+    .btn.good:hover{ background: rgba(55,214,122,.20); }
+
+    .btn.bad{
+      background: rgba(255,92,122,.14);
+      border-color: rgba(255,92,122,.40);
+    }
+    .btn.bad:hover{ background: rgba(255,92,122,.20); }
+
+    .btn.ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.10);
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+
+    @media (min-width: 980px){
+      .cards{ grid-template-columns: 420px 1fr; align-items:start; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding:16px;
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size:15px;
+    }
+
+    form{
+      display:grid;
+      gap:10px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    @media (max-width:520px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    textarea{
+      resize: vertical;
+      min-height: 78px;
+    }
+
+    .summary{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      padding-top:10px;
+      border-top:1px solid rgba(255,255,255,.08);
+      margin-top:10px;
+    }
+
+    .total{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .dot{
+      width:8px; height:8px; border-radius:99px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(106,166,255,.15);
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+    }
+
+    thead th{
+      text-align:left;
+      font-size:12px;
+      color: var(--muted);
+      font-weight:700;
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    tbody td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      vertical-align: top;
+    }
+
+    tbody tr:hover td{
+      background: rgba(255,255,255,.03);
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .right{ text-align:right; white-space:nowrap; }
+    .small{ font-size:12px; color: var(--muted); }
+    .strike{ text-decoration: line-through; opacity:.75; }
+
+    .row-edit input, .row-edit textarea{ width:100%; padding:8px 9px; border-radius: 10px; }
+
+    .note{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.4;
+    }
+
+    .empty{
+      padding:14px;
+      border:1px dashed rgba(255,255,255,.16);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255,255,255,.03);
+      margin-top:12px;
+    }
+
+    .footer-row{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    /*********************************************************************
+     * DISCLAIMER BANNER (white panel at bottom)
+     *********************************************************************/
+    .disclaimer{
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 9999;
+
+      background: #ffffff;            /* white panel */
+      color: #0b0f14;                  /* dark text */
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      border: 1px solid rgba(0,0,0,.08);
+    }
+
+    .disclaimer strong{
+      font-weight: 900;
+    }
+
+    .disclaimer .sub{
+      margin-top: 4px;
+      color: rgba(11,15,20,.78);
+      font-size: 12.5px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="top">
+        <div>
+          <h1>Yearly Wishlist Budget</h1>
+          <div class="muted" style="margin-top:4px;">Track what you want to buy each year and the total cost.</div>
+        </div>
+
+        <div class="year-controls">
+          <div>
+            <label for="yearSelect">Year</label><br />
+            <select id="yearSelect" aria-label="Select year"></select>
+          </div>
+
+          <div>
+            <label for="yearInput">Jump/Add year</label><br />
+            <input id="yearInput" type="number" min="2000" max="2100" step="1" placeholder="e.g., 2027" />
+          </div>
+
+          <button id="setYearBtn" class="btn primary" type="button">Set year</button>
+          <button id="resetYearBtn" class="btn ghost" type="button" title="Clear this year only">Clear year</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="cards">
+      <!-- LEFT: Add item form -->
+      <section class="card">
+        <h2>Add item</h2>
+
+        <form id="addForm">
+          <div class="grid2">
+            <div>
+              <label for="itemName">Item name</label><br />
+              <input id="itemName" type="text" placeholder="e.g., iPad mini" required />
+            </div>
+            <div>
+              <label for="itemPrice">Price (per item)</label><br />
+              <input id="itemPrice" type="number" min="0" step="0.01" placeholder="e.g., 499.99" required />
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div>
+              <label for="itemQty">Quantity</label><br />
+              <input id="itemQty" type="number" min="1" step="1" value="1" required />
+            </div>
+            <div>
+              <label for="itemStatus">Status</label><br />
+              <select id="itemStatus">
+                <option value="planned" selected>Planned</option>
+                <option value="bought">Bought</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="itemNotes">Notes (optional)</label><br />
+            <textarea id="itemNotes" placeholder="Link, color, why you want it, etc."></textarea>
+          </div>
+
+          <button class="btn good" type="submit">Add to year</button>
+        </form>
+
+        <div class="summary">
+          <div class="pill"><span class="dot"></span><span id="itemsCount">0 items</span></div>
+          <div class="total" id="yearTotal">$0.00</div>
+        </div>
+
+        <div class="note">
+          Tip: Use the year dropdown to switch between 2027 / 2028 and keep separate lists.
+        </div>
+      </section>
+
+      <!-- RIGHT: Items list -->
+      <section class="card">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <h2 style="margin:0;">Items for <span id="yearLabel"></span></h2>
+
+          <div class="footer-row">
+            <button id="markAllPlannedBtn" class="btn ghost" type="button">Mark all Planned</button>
+            <button id="markAllBoughtBtn" class="btn ghost" type="button">Mark all Bought</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px; overflow:auto;">
+          <table aria-label="Wishlist items">
+            <thead>
+              <tr>
+                <th style="min-width:220px;">Item</th>
+                <th style="min-width:140px;">Notes</th>
+                <th class="right" style="min-width:110px;">Price</th>
+                <th class="right" style="min-width:90px;">Qty</th>
+                <th class="right" style="min-width:120px;">Line total</th>
+                <th class="right" style="min-width:210px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listBody"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty" style="display:none;">
+          No items yet. Add something on the left.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER (Displayed at the bottom of the page) -->
+  <footer class="disclaimer" id="disclaimerBar" role="note" aria-label="Disclaimer">
+    <div>
+      <div><strong>Disclaimer:</strong> This website is not financial advice.</div>
+      <div class="sub">
+        All data you enter is stored only for this session and will be wiped when you close this tab or browser.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /**************************************************************************
+     * Yearly Wishlist Budget (single-file app)
+     *
+     * WHAT THIS APP DOES
+     * - Keep separate item lists per year (2027, 2028, etc.)
+     * - Add/Edit/Delete items
+     * - Line total per item + total per year
+     *
+     * IMPORTANT (per your disclaimer request)
+     * - Uses sessionStorage (NOT localStorage), so data is cleared when you
+     *   close the tab/browser session.
+     **************************************************************************/
+
+    // -----------------------------
+    // Storage helpers
+    // -----------------------------
+
+    // Key used for sessionStorage
+    const STORAGE_KEY = "wishlistBudget:v1";
+
+    /**
+     * Read app state from sessionStorage.
+     * If there is no state saved, returns a default state.
+     */
+    function loadState() {
+      try {
+        // sessionStorage clears when the tab/window is closed
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+
+        // Default state if nothing exists
+        if (!raw) return { currentYear: new Date().getFullYear(), years: {} };
+
+        const parsed = JSON.parse(raw);
+
+        // Basic shape validation / defaults
+        return {
+          currentYear: Number(parsed.currentYear) || new Date().getFullYear(),
+          years: typeof parsed.years === "object" && parsed.years ? parsed.years : {}
+        };
+      } catch {
+        // If JSON parse fails, fall back to a safe default
+        return { currentYear: new Date().getFullYear(), years: {} };
+      }
+    }
+
+    /**
+     * Write current app state to sessionStorage.
+     */
+    function saveState() {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    // -----------------------------
+    // App state (in-memory)
+    // -----------------------------
+    let state = loadState();
+
+    /**
+     * Ensure a year exists in state.years.
+     * Each year maps to an array of items.
+     */
+    function ensureYear(year) {
+      const y = String(year);
+      if (!state.years[y]) state.years[y] = [];
+    }
+
+    // Ensure the current year exists in storage
+    ensureYear(state.currentYear);
+    saveState();
+
+    // -----------------------------
+    // DOM references
+    // -----------------------------
+    const yearSelect = document.getElementById("yearSelect");
+    const yearInput = document.getElementById("yearInput");
+    const setYearBtn = document.getElementById("setYearBtn");
+    const resetYearBtn = document.getElementById("resetYearBtn");
+
+    const addForm = document.getElementById("addForm");
+    const itemName = document.getElementById("itemName");
+    const itemPrice = document.getElementById("itemPrice");
+    const itemQty = document.getElementById("itemQty");
+    const itemStatus = document.getElementById("itemStatus");
+    const itemNotes = document.getElementById("itemNotes");
+
+    const yearLabel = document.getElementById("yearLabel");
+    const listBody = document.getElementById("listBody");
+    const emptyState = document.getElementById("emptyState");
+
+    const yearTotal = document.getElementById("yearTotal");
+    const itemsCount = document.getElementById("itemsCount");
+
+    const markAllPlannedBtn = document.getElementById("markAllPlannedBtn");
+    const markAllBoughtBtn = document.getElementById("markAllBoughtBtn");
+
+    // -----------------------------
+    // Formatting helpers
+    // -----------------------------
+
+    // Currency formatter (defaults to user's locale; USD is common for budgeting)
+    const money = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
+
+    /**
+     * Safely format numbers as currency.
+     */
+    function toMoney(n) {
+      const num = Number(n);
+      return money.format(Number.isFinite(num) ? num : 0);
+    }
+
+    /**
+     * Clamp year to a reasonable range.
+     * Returns an integer year or null if invalid.
+     */
+    function clampYear(y) {
+      const n = Number(y);
+      if (!Number.isFinite(n)) return null;
+      if (n < 2000 || n > 2100) return null;
+      return Math.trunc(n);
+    }
+
+    /**
+     * Current year key in string form (used for state.years lookup).
+     */
+    function currentYearKey() {
+      return String(state.currentYear);
+    }
+
+    /**
+     * Returns the item list for the currently selected year.
+     */
+    function getItemsForCurrentYear() {
+      ensureYear(state.currentYear);
+      return state.years[currentYearKey()];
+    }
+
+    /**
+     * Compute total cost for a year.
+     */
+    function computeYearTotal(items) {
+      return items.reduce((sum, it) => sum + (Number(it.price) * Number(it.qty)), 0);
+    }
+
+    /**
+     * Simple unique id generator for items (good enough for this app).
+     */
+    function uuid() {
+      return Math.random().toString(16).slice(2) + Date.now().toString(16);
+    }
+
+    /**
+     * Round to two decimals (money).
+     */
+    function round2(n) {
+      return Math.round(Number(n) * 100) / 100;
+    }
+
+    /**
+     * Escape text before inserting into innerHTML (prevents injection).
+     */
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    // -----------------------------
+    // Rendering: Year dropdown
+    // -----------------------------
+    function renderYearSelect() {
+      // Collect existing years, sort ascending
+      const years = Object.keys(state.years)
+        .map(Number)
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+
+      // If none exist, at least show current year
+      if (years.length === 0) years.push(state.currentYear);
+
+      // Build dropdown options
+      yearSelect.innerHTML = "";
+      for (const y of years) {
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = String(y);
+        if (y === state.currentYear) opt.selected = true;
+        yearSelect.appendChild(opt);
+      }
+
+      // Update label
+      yearLabel.textContent = state.currentYear;
+    }
+
+    // -----------------------------
+    // Rendering: Items table
+    // -----------------------------
+    function renderList() {
+      const items = getItemsForCurrentYear();
+
+      // Show/hide empty state
+      emptyState.style.display = items.length === 0 ? "block" : "none";
+
+      // Compute totals + counts
+      const total = computeYearTotal(items);
+      yearTotal.textContent = toMoney(total);
+      itemsCount.textContent = `${items.length} item${items.length === 1 ? "" : "s"}`;
+
+      // Build table rows
+      listBody.innerHTML = "";
+      for (const it of items) {
+        const tr = document.createElement("tr");
+        tr.dataset.id = it.id;
+
+        const lineTotal = Number(it.price) * Number(it.qty);
+
+        // Status dot color is set inline for clarity
+        tr.innerHTML = `
+          <td>
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div style="min-width:10px; padding-top:6px;">
+                <span title="${it.status === "bought" ? "Bought" : "Planned"}"
+                      style="display:inline-block; width:10px; height:10px; border-radius:999px;
+                             background:${it.status === "bought" ? "rgba(55,214,122,.95)" : "rgba(255,209,102,.95)"};
+                             box-shadow:0 0 0 3px ${it.status === "bought" ? "rgba(55,214,122,.12)" : "rgba(255,209,102,.14)"};"></span>
+              </div>
+              <div>
+                <div class="${it.status === "bought" ? "strike" : ""}" style="font-weight:800;">
+                  ${escapeHtml(it.name)}
+                </div>
+                <div class="small">${it.status === "bought" ? "Bought" : "Planned"}</div>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <div class="small" style="white-space:pre-wrap;">
+              ${it.notes ? escapeHtml(it.notes) : ""}
+            </div>
+          </td>
+
+          <td class="right">${toMoney(it.price)}</td>
+          <td class="right">${Number(it.qty)}</td>
+          <td class="right" style="font-weight:800;">${toMoney(lineTotal)}</td>
+
+          <td class="right">
+            <div class="actions">
+              <button class="btn ghost" data-action="toggle">
+                ${it.status === "bought" ? "Mark Planned" : "Mark Bought"}
+              </button>
+              <button class="btn primary" data-action="edit">Edit</button>
+              <button class="btn bad" data-action="delete">Delete</button>
+            </div>
+          </td>
+        `;
+
+        listBody.appendChild(tr);
+      }
+    }
+
+    // -----------------------------
+    // Year changing logic
+    // -----------------------------
+    function setYear(year) {
+      const y = clampYear(year);
+      if (!y) {
+        alert("Please enter a valid year between 2000 and 2100.");
+        return;
+      }
+
+      // Update state
+      state.currentYear = y;
+      ensureYear(y);
+
+      // Persist + re-render
+      saveState();
+      renderYearSelect();
+      renderList();
+    }
+
+    // Dropdown year change
+    yearSelect.addEventListener("change", (e) => {
+      setYear(e.target.value);
+    });
+
+    // Jump/Add year button
+    setYearBtn.addEventListener("click", () => {
+      setYear(yearInput.value);
+      yearInput.value = "";
+    });
+
+    // Enter key in year input triggers set
+    yearInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        setYearBtn.click();
+      }
+    });
+
+    // Clear only the current year's list
+    resetYearBtn.addEventListener("click", () => {
+      const yKey = currentYearKey();
+      const ok = confirm(`Clear all items for ${yKey}?`);
+      if (!ok) return;
+
+      state.years[yKey] = [];
+      saveState();
+      renderList();
+    });
+
+    // -----------------------------
+    // Add item logic
+    // -----------------------------
+    addForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      // Read and validate input
+      const name = itemName.value.trim();
+      const price = Number(itemPrice.value);
+      const qty = Number(itemQty.value);
+      const status = itemStatus.value;
+      const notes = itemNotes.value.trim();
+
+      if (!name) return alert("Please enter an item name.");
+      if (!Number.isFinite(price) || price < 0) return alert("Please enter a valid price (0 or more).");
+      if (!Number.isFinite(qty) || qty < 1) return alert("Quantity must be 1 or more.");
+
+      // Insert new item at the top
+      const items = getItemsForCurrentYear();
+      items.unshift({
+        id: uuid(),
+        name,
+        price: round2(price),
+        qty: Math.trunc(qty),
+        status: status === "bought" ? "bought" : "planned",
+        notes
+      });
+
+      // Save + re-render
+      saveState();
+      renderYearSelect();
+      renderList();
+
+      // Reset form
+      itemName.value = "";
+      itemPrice.value = "";
+      itemQty.value = "1";
+      itemStatus.value = "planned";
+      itemNotes.value = "";
+      itemName.focus();
+    });
+
+    // -----------------------------
+    // Row actions (toggle/edit/delete)
+    // -----------------------------
+    listBody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const tr = e.target.closest("tr");
+      if (!tr) return;
+
+      const id = tr.dataset.id;
+      const action = btn.dataset.action;
+
+      if (action === "delete") return deleteItem(id);
+      if (action === "toggle") return toggleItem(id);
+      if (action === "edit") return enterEditMode(tr, id);
+    });
+
+    /**
+     * Find an item in the current year's list.
+     * Returns { items, idx } where idx is -1 if not found.
+     */
+    function findItemIndex(id) {
+      const items = getItemsForCurrentYear();
+      const idx = items.findIndex(it => it.id === id);
+      return { items, idx };
+    }
+
+    // Delete an item
+    function deleteItem(id) {
+      const { items, idx } = findItemIndex(id);
+      if (idx === -1) return;
+
+      const ok = confirm("Delete this item?");
+      if (!ok) return;
+
+      items.splice(idx, 1);
+      saveState();
+      renderList();
+    }
+
+    // Toggle between planned/bought
+    function toggleItem(id) {
+      const { items, idx } = findItemIndex(id);
+      if (idx === -1) return;
+
+      items[idx].status = (items[idx].status === "bought") ? "planned" : "bought";
+      saveState();
+      renderList();
+    }
+
+    // Put a row into inline edit mode
+    function enterEditMode(tr, id) {
+      const { items, idx } = findItemIndex(id);
+      if (idx === -1) return;
+
+      const it = items[idx];
+
+      tr.classList.add("row-edit");
+
+      // Replace row HTML with editable inputs
+      tr.innerHTML = `
+        <td>
+          <label class="small">Item</label>
+          <input data-field="name" type="text" value="${escapeHtml(it.name)}" />
+          <div style="margin-top:8px;">
+            <label class="small">Status</label><br/>
+            <select data-field="status">
+              <option value="planned" ${it.status === "planned" ? "selected" : ""}>Planned</option>
+              <option value="bought" ${it.status === "bought" ? "selected" : ""}>Bought</option>
+            </select>
+          </div>
+        </td>
+
+        <td>
+          <label class="small">Notes</label>
+          <textarea data-field="notes">${it.notes ? escapeHtml(it.notes) : ""}</textarea>
+        </td>
+
+        <td class="right">
+          <label class="small">Price</label>
+          <input data-field="price" type="number" min="0" step="0.01" value="${Number(it.price)}" />
+        </td>
+
+        <td class="right">
+          <label class="small">Qty</label>
+          <input data-field="qty" type="number" min="1" step="1" value="${Number(it.qty)}" />
+        </td>
+
+        <td class="right" style="font-weight:800; padding-top:28px;">
+          ${toMoney(Number(it.price) * Number(it.qty))}
+        </td>
+
+        <td class="right">
+          <div class="actions" style="justify-content:flex-end;">
+            <button class="btn good" data-action="save">Save</button>
+            <button class="btn ghost" data-action="cancel">Cancel</button>
+          </div>
+        </td>
+      `;
+
+      // Wire Save/Cancel handlers for this row only
+      const saveBtn = tr.querySelector('button[data-action="save"]');
+      const cancelBtn = tr.querySelector('button[data-action="cancel"]');
+
+      saveBtn.addEventListener("click", () => saveEdit(tr, id));
+      cancelBtn.addEventListener("click", () => renderList());
+    }
+
+    // Save edits back to state
+    function saveEdit(tr, id) {
+      const { items, idx } = findItemIndex(id);
+      if (idx === -1) return;
+
+      const name = tr.querySelector('[data-field="name"]').value.trim();
+      const notes = tr.querySelector('[data-field="notes"]').value.trim();
+      const status = tr.querySelector('[data-field="status"]').value;
+      const price = Number(tr.querySelector('[data-field="price"]').value);
+      const qty = Number(tr.querySelector('[data-field="qty"]').value);
+
+      if (!name) return alert("Item name cannot be empty.");
+      if (!Number.isFinite(price) || price < 0) return alert("Please enter a valid price (0 or more).");
+      if (!Number.isFinite(qty) || qty < 1) return alert("Quantity must be 1 or more.");
+
+      items[idx] = {
+        ...items[idx],
+        name,
+        notes,
+        status: status === "bought" ? "bought" : "planned",
+        price: round2(price),
+        qty: Math.trunc(qty)
+      };
+
+      saveState();
+      renderList();
+    }
+
+    // -----------------------------
+    // Bulk actions (set all statuses)
+    // -----------------------------
+    markAllPlannedBtn.addEventListener("click", () => {
+      const items = getItemsForCurrentYear();
+      if (items.length === 0) return;
+
+      items.forEach(it => it.status = "planned");
+      saveState();
+      renderList();
+    });
+
+    markAllBoughtBtn.addEventListener("click", () => {
+      const items = getItemsForCurrentYear();
+      if (items.length === 0) return;
+
+      items.forEach(it => it.status = "bought");
+      saveState();
+      renderList();
+    });
+
+    // -----------------------------
+    // Initial render
+    // -----------------------------
+    renderYearSelect();
+    renderList();
+  </script>
+</body>
+</html>

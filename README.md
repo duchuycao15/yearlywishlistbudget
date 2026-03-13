@@ -8,4 +8,4 @@ Helps me become a better planner 📈
 
 This help me manage my bugguet and track my expend 
 
-I used HTML and CSS and Javascipt to made it and I also combine one file so that I can easy submit on github.
+I used HTML, CSS, and JavaScript to create it, and I also combined everything into a single file so that I can easily submit it on GitHub.
